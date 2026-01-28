@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../db/database');
+const { validateEmail, validatePassword } = require('../utils/validation');
 
 /**
  * Register a new user
@@ -17,6 +18,13 @@ const signup = (req, res) => {
     });
   }
 
+  // Validate name
+  if (typeof name !== 'string' || name.length < 2 || name.length > 100) {
+    return res.status(400).json({
+      error: 'Name must be between 2 and 100 characters'
+    });
+  }
+
   // Validate role
   if (!['user', 'admin'].includes(role)) {
     return res.status(400).json({
@@ -25,15 +33,14 @@ const signup = (req, res) => {
   }
 
   // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!validateEmail(email)) {
     return res.status(400).json({
       error: 'Invalid email format'
     });
   }
 
-  // Validate password length
-  if (password.length < 6) {
+  // Validate password strength
+  if (!validatePassword(password)) {
     return res.status(400).json({
       error: 'Password must be at least 6 characters long'
     });
@@ -77,6 +84,9 @@ const signup = (req, res) => {
  * Authenticate user and return JWT token
  * POST /signin
  * Body: { email, password }
+ * 
+ * SECURITY: Returns generic error message for non-existent users
+ * to prevent user enumeration attacks
  */
 const signin = (req, res) => {
   const { email, password } = req.body;
@@ -97,7 +107,7 @@ const signin = (req, res) => {
       });
     }
 
-    // User not found
+    // User not found - return generic error to prevent user enumeration
     if (!user) {
       return res.status(401).json({
         error: 'Invalid email or password'
@@ -112,7 +122,7 @@ const signin = (req, res) => {
         });
       }
 
-      // Password doesn't match
+      // Password doesn't match - return generic error
       if (!isMatch) {
         return res.status(401).json({
           error: 'Invalid email or password'
