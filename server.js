@@ -1,8 +1,13 @@
 const express = require('express');
+const { initializeDatabase } = require('./src/db/init');
+
 const app = express();
 
 // Middleware
 app.use(express.json());
+
+// Initialize database
+initializeDatabase();
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {
