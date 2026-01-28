@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import api from '../services/api'
 import './Auth.css'
 
 export default function Signup() {
@@ -27,19 +28,7 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      const response = await fetch('http://localhost:5000/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Signup failed')
-      }
+      await api.signup(formData)
 
       // Redirect to login after successful signup
       navigate('/login')
