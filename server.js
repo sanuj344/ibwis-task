@@ -1,6 +1,7 @@
 const express = require('express');
 const { initializeDatabase } = require('./src/db/init');
 const authRoutes = require('./src/routes/authRoutes');
+const blogRoutes = require('./src/routes/blogRoutes');
 
 const app = express();
 
@@ -12,6 +13,7 @@ initializeDatabase();
 
 // Routes
 app.use('/', authRoutes);
+app.use('/', blogRoutes);
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {
