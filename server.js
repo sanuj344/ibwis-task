@@ -1,5 +1,6 @@
 const express = require('express');
 const { initializeDatabase } = require('./src/db/init');
+const authRoutes = require('./src/routes/authRoutes');
 
 const app = express();
 
@@ -8,6 +9,9 @@ app.use(express.json());
 
 // Initialize database
 initializeDatabase();
+
+// Routes
+app.use('/', authRoutes);
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {
