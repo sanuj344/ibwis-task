@@ -1,5 +1,5 @@
 const express = require('express');
-const { getAllBlogs, createBlog, updateBlog } = require('../controllers/blogController');
+const { getAllBlogs, createBlog, updateBlog, deleteBlog } = require('../controllers/blogController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -22,5 +22,11 @@ router.post('/blogs', authMiddleware, createBlog);
  * Protected endpoint - update blog (Owner or Admin only)
  */
 router.put('/blogs/:id', authMiddleware, updateBlog);
+
+/**
+ * DELETE /blogs/:id
+ * Protected endpoint - delete blog (Admin only)
+ */
+router.delete('/blogs/:id', authMiddleware, deleteBlog);
 
 module.exports = router;

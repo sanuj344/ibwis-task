@@ -148,4 +148,56 @@ const updateBlog = (req, res) => {
   });
 };
 
-module.exports = { getAllBlogs, createBlog, updateBlog };
+/**
+ * Delete a blog
+ * DELETE /blogs/:id
+ * Protected: Admin only
+ * 
+ * Authorization check:
+ * - Only users with 'admin' role can delete blogs
+ * - Returns 403 Forbidden if not admin
+ */
+const deleteBlog = (req, res) => {
+  const { id } = req.params;
+
+  // Check if user is admin
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      error: 'Forbidden: Only administrators can delete blogs'
+    });
+  }
+
+  // Fetch blog to verify it exists
+  const selectQuery = 'SELECT * FROM blogs WHERE id = ?';
+  db.get(selectQuery, [id], (err, blog) => {
+    if (err) {
+      return res.status(500).json({
+        error: 'Error fetching blog'
+      });
+    }
+
+    // Blog not found
+    if (!blog) {
+      return res.status(404).json({
+        error: 'Blog not found'
+      });
+    }
+
+    // Delete blog
+    const deleteQuery = 'DELETE FROM blogs WHERE id = ?';
+    db.run(deleteQuery, [id], (err) => {
+      if (err) {
+        return res.status(500).json({
+          error: 'Error deleting blog'
+        });
+      }
+
+      res.status(200).json({
+        message: 'Blog deleted successfully',
+        blog_id: id
+      });
+    });
+  });
+};
+
+module.exports = { getAllBlogs, createBlog, updateBlog, deleteBlog };
