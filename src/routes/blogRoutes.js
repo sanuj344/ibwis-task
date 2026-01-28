@@ -1,5 +1,5 @@
 const express = require('express');
-const { getAllBlogs, createBlog } = require('../controllers/blogController');
+const { getAllBlogs, createBlog, updateBlog } = require('../controllers/blogController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -16,5 +16,11 @@ router.get('/blogs', getAllBlogs);
  * Authorization is handled by authMiddleware
  */
 router.post('/blogs', authMiddleware, createBlog);
+
+/**
+ * PUT /blogs/:id
+ * Protected endpoint - update blog (Owner or Admin only)
+ */
+router.put('/blogs/:id', authMiddleware, updateBlog);
 
 module.exports = router;

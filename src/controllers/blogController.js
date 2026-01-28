@@ -79,4 +79,73 @@ const createBlog = (req, res) => {
   });
 };
 
-module.exports = { getAllBlogs, createBlog };
+/**
+ * Update a blog
+ * PUT /blogs/:id
+ * Protected: Blog owner or Admin only
+ * 
+ * Authorization check:
+ * - User must be the blog owner OR have admin role
+ * - Returns 403 Forbidden if not authorized
+ */
+const updateBlog = (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+
+  // Validate inputs
+  if (!title || !content) {
+    return res.status(400).json({
+      error: 'Missing required fields: title, content'
+    });
+  }
+
+  // Fetch blog from database
+  const selectQuery = 'SELECT * FROM blogs WHERE id = ?';
+  db.get(selectQuery, [id], (err, blog) => {
+    if (err) {
+      return res.status(500).json({
+        error: 'Error fetching blog'
+      });
+    }
+
+    // Blog not found
+    if (!blog) {
+      return res.status(404).json({
+        error: 'Blog not found'
+      });
+    }
+
+    // Check authorization: must be blog owner OR admin
+    const isOwner = blog.user_id === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        error: 'Forbidden: You do not have permission to update this blog'
+      });
+    }
+
+    // Update blog
+    const updateQuery = 'UPDATE blogs SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+    db.run(updateQuery, [title, content, id], (err) => {
+      if (err) {
+        return res.status(500).json({
+          error: 'Error updating blog'
+        });
+      }
+
+      res.status(200).json({
+        message: 'Blog updated successfully',
+        blog: {
+          id,
+          title,
+          content,
+          user_id: blog.user_id,
+          updated_at: new Date().toISOString()
+        }
+      });
+    });
+  });
+};
+
+module.exports = { getAllBlogs, createBlog, updateBlog };
