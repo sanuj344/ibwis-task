@@ -36,15 +36,51 @@
   text-decoration: none;
   transition: color 0.3s;
   font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
 }
 
 .nav-link:hover {
   color: #667eea;
 }
 
+.signup-link {
+  background-color: #667eea;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.signup-link:hover {
+  background-color: #5568d3;
+  color: white;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: white !important;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}
+
 .nav-user {
   color: #ccc;
   font-size: 0.9rem;
+}
+
+.admin-badge {
+  background-color: #ffc107;
+  color: black;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 @media (max-width: 600px) {
@@ -57,5 +93,9 @@
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  .navbar-logo {
+    font-size: 1.2rem;
   }
 }
