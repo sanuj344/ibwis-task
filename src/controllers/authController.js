@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const db = require('../db/database');
 
 /**
@@ -72,4 +73,78 @@ const signup = (req, res) => {
   });
 };
 
-module.exports = { signup };
+/**
+ * Authenticate user and return JWT token
+ * POST /signin
+ * Body: { email, password }
+ */
+const signin = (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate inputs
+  if (!email || !password) {
+    return res.status(400).json({
+      error: 'Missing required fields: email, password'
+    });
+  }
+
+  // Fetch user from database
+  const query = 'SELECT * FROM users WHERE email = ?';
+  db.get(query, [email], (err, user) => {
+    if (err) {
+      return res.status(500).json({
+        error: 'Database error'
+      });
+    }
+
+    // User not found
+    if (!user) {
+      return res.status(401).json({
+        error: 'Invalid email or password'
+      });
+    }
+
+    // Compare passwords using bcrypt
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err) {
+        return res.status(500).json({
+          error: 'Error comparing passwords'
+        });
+      }
+
+      // Password doesn't match
+      if (!isMatch) {
+        return res.status(401).json({
+          error: 'Invalid email or password'
+        });
+      }
+
+      // Generate JWT token with user id and role
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          name: user.name
+        },
+        process.env.JWT_SECRET || 'your_super_secret_jwt_key_change_in_production',
+        {
+          expiresIn: process.env.JWT_EXPIRATION || '7d'
+        }
+      );
+
+      res.status(200).json({
+        message: 'Authentication successful',
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      });
+    });
+  });
+};
+
+module.exports = { signup, signin };
