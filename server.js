@@ -1,10 +1,19 @@
 const express = require('express');
+const cors = require('cors');
 const { initializeDatabase } = require('./src/db/init');
 const authRoutes = require('./src/routes/authRoutes');
 const blogRoutes = require('./src/routes/blogRoutes');
 const { errorHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
+
+// CORS middleware - allow frontend access
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware for security & parsing
 app.use(express.json({ limit: '10kb' })); // Limit request body size
